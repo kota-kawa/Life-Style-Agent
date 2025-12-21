@@ -1,0 +1,19 @@
+services:
+  qasystem:
+    build: .
+    container_name: lifestyle_agent
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app      # プロジェクト全体を /app にマウント
+    networks:
+      default:
+      multi_agent_network:
+        aliases:
+          - lifestyle_agent
+
+networks:
+  multi_agent_network:
+    external: true
+    name: ${MULTI_AGENT_NETWORK:-multi_agent_platform_net}
+

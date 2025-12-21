@@ -1,0 +1,73 @@
+# --- Python Standard ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+ENV/
+.env_bak/
+
+# --- Environment Variables & Secrets ---
+.env
+*.env
+secrets.env
+
+# --- IDE & OS Files ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+
+# --- Project Specific: Runtime & Output ---
+# Runtime conversation history
+conversation_history.json
+
+# Generated Vector Databases (FAISS indices)
+# These are build artifacts and should generally be rebuilt from source
+home-topic-vdb/
+constitution_vector_db/
+.constitution_vector_db/
+
+# Generated Static Outputs
+static/vector_db_*/
+static/sample_FAQ_*/
+output_jsonl/
+
+# --- Temporary/Binary Files ---
+*.pid
+*.sock
+*.gz
+*.zip
+*.tar
+
+# Note: We removed blanket ignores for *.json, *.txt, *.docx, *.pdf 
+# to allow tracking of source data and requirements.
+*.Identifier
