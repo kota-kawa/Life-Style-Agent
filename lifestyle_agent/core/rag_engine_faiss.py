@@ -70,33 +70,29 @@ def load_all_indices():
     if not os.path.exists(INDEX_DB_DIR):
         raise RuntimeError(f"Directory not found: {INDEX_DB_DIR}")
 
-    subdirs = [
-        d for d in os.listdir(INDEX_DB_DIR)
-        if os.path.isdir(os.path.join(INDEX_DB_DIR, d))
-    ]
-
     combined_store: Optional[FAISS] = None
-    for subdir in subdirs:
-        persist = os.path.join(INDEX_DB_DIR, subdir, "persist")
-        index_path = os.path.join(persist, "index.faiss")
-        if not os.path.exists(index_path):
-            logging.warning(f"FAISS index not found in {subdir}, skipping...")
-            continue
-
-        try:
-            store = FAISS.load_local(
-                persist,
-                embeddings,
-                allow_dangerous_deserialization=True,
-            )
-        except Exception:
-            logging.exception(f"Failed to load FAISS index from {persist}")
-            continue
-
-        if combined_store is None:
-            combined_store = store
-        else:
-            combined_store.merge_from(store)
+    
+    # 再帰的に探索して index.faiss を探す
+    for root, dirs, files in os.walk(INDEX_DB_DIR):
+        if "index.faiss" in files:
+            # root は index.faiss があるディレクトリ (通常は persist)
+            persist_dir = root
+            
+            try:
+                store = FAISS.load_local(
+                    persist_dir,
+                    embeddings,
+                    allow_dangerous_deserialization=True,
+                )
+                logging.info(f"Loaded FAISS index from {persist_dir}")
+                
+                if combined_store is None:
+                    combined_store = store
+                else:
+                    combined_store.merge_from(store)
+            except Exception:
+                logging.exception(f"Failed to load FAISS index from {persist_dir}")
+                continue
 
     if combined_store is None:
         raise RuntimeError("Failed to load any FAISS indices.")
