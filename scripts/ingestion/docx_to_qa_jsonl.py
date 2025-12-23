@@ -28,7 +28,7 @@ question, answer の2キーのみを持つ JSONL に出力するスクリプト�
    GEMINI_MODEL=gemini-2.5-pro
 
 3) 実行:
-   python docx_to_qa_jsonl.py input.docx output.jsonl
+   python scripts/ingestion/docx_to_qa_jsonl.py input.docx output.jsonl
 
    オプション:
    --chunk-chars 8000        # チャンクの文字数上限（既定: 8000）
@@ -65,9 +65,11 @@ from tqdm import tqdm
 # docx
 from docx import Document  # python-docx
 
+from lifestyle_agent.config.paths import INGESTION_SECRETS_ENV, SECRETS_ENV
+
 _ENV_FILES = [
-    Path(__file__).resolve().parent / "secrets.env",
-    Path(__file__).resolve().parents[1] / "secrets.env",
+    SECRETS_ENV,
+    INGESTION_SECRETS_ENV,
 ]
 for env_path in _ENV_FILES:
     load_dotenv(env_path, override=False)

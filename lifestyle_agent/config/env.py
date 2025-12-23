@@ -5,7 +5,9 @@ from typing import Iterable
 
 from dotenv import load_dotenv
 
-_DEFAULT_ENV_FILES = [Path(__file__).resolve().parent / "secrets.env"]
+from lifestyle_agent.config.paths import SECRETS_ENV
+
+_DEFAULT_ENV_FILES = [SECRETS_ENV]
 
 
 def load_secrets_env(additional_paths: Iterable[Path] | None = None) -> None:

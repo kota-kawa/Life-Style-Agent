@@ -4,7 +4,7 @@
 """
 docx_to_qa_jsonl_thinking.py
 - .docx を走査して Q/A を JSONL に書き出すバッチ。
-- 実行は常に:  python3 docx_to_qa_jsonl_thinking.py
+- 実行は常に:  python scripts/ingestion/docx_to_qa_jsonl_thinking.py
 - thinking は常に 'high'。オプション不要。
 
 主な改良点:
@@ -37,9 +37,11 @@ from docx.text.paragraph import Paragraph
 from openai import OpenAI
 from openai import APIError, RateLimitError, APITimeoutError, InternalServerError
 
+from lifestyle_agent.config.paths import DOCX_SOURCE_DIR, INGESTION_SECRETS_ENV, QA_JSONL_DIR, SECRETS_ENV
+
 _ENV_FILES = [
-    Path(__file__).resolve().parent / "secrets.env",
-    Path(__file__).resolve().parents[1] / "secrets.env",
+    SECRETS_ENV,
+    INGESTION_SECRETS_ENV,
 ]
 for env_path in _ENV_FILES:
     load_dotenv(env_path, override=False)
@@ -426,8 +428,8 @@ def main():
     for env_path in _ENV_FILES:
         load_dotenv(env_path, override=False)
 
-    INPUT_DIR = Path(os.getenv("DOCX_IN_DIR", "./home-topic")).resolve()
-    OUTPUT_DIR = Path(os.getenv("JSONL_OUT_DIR", "./qa_data_jsonl")).resolve()
+    INPUT_DIR = Path(os.getenv("DOCX_IN_DIR", str(DOCX_SOURCE_DIR))).resolve()
+    OUTPUT_DIR = Path(os.getenv("JSONL_OUT_DIR", str(QA_JSONL_DIR))).resolve()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 

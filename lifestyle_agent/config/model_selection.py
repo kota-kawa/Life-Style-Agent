@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+from lifestyle_agent.config.paths import ROOT_DIR
+
 DEFAULT_SELECTION = {"provider": "openai", "model": "gpt-5.1"}
 
 PROVIDER_DEFAULTS: Dict[str, Dict[str, str | List[str] | None]] = {
@@ -51,7 +53,7 @@ _LAST_SET_BASE_URL: str | None = None
 def _load_selection_file(agent_key: str) -> Dict[str, str]:
     """Return the model selection for the given agent key."""
 
-    platform_path = Path(__file__).resolve().parent.parent / "Multi-Agent-Platform" / "model_settings.json"
+    platform_path = ROOT_DIR / "Multi-Agent-Platform" / "model_settings.json"
     try:
         data = json.loads(platform_path.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError):

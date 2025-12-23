@@ -3,7 +3,9 @@ import os
 import uuid
 from datetime import datetime
 
-EVAL_FILE = "evaluation/evaluation_data.json"
+from lifestyle_agent.config.paths import EVALUATION_FILE
+
+EVAL_FILE = str(EVALUATION_FILE)
 
 def _load_data():
     if not os.path.exists(EVAL_FILE):

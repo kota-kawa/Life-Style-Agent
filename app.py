@@ -9,20 +9,21 @@ import uuid
 
 import anyio
 import requests
-from env_loader import load_secrets_env
 from flask import Flask, Response, jsonify, render_template, request, stream_with_context
 from flask_cors import CORS
 from mcp.types import JSONRPCMessage
 
-import ai_engine_faiss as ai_engine
-from lifestyle_tools import analyze_conversation_payload, run_rag_answer
+from lifestyle_agent.api.mcp_tools import analyze_conversation_payload, run_rag_answer
+from lifestyle_agent.config.env import load_secrets_env
+from lifestyle_agent.config.model_selection import current_selection, update_override
+from lifestyle_agent.config.paths import STATIC_DIR, TEMPLATES_DIR
+from lifestyle_agent.core import rag_engine_faiss as ai_engine
+from lifestyle_agent.evaluation import manager as evaluation_manager
 from mcp_server import mcp_server
-from model_selection import current_selection, update_override
-import evaluation_manager
 
 # ── 環境変数 / Flask 初期化 ──
 load_secrets_env()
-app = Flask(__name__)
+app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STATIC_DIR))
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
 logging.basicConfig(level=logging.DEBUG)
 _PLATFORM_BASE = os.getenv("MULTI_AGENT_PLATFORM_BASE", "http://web:5050").rstrip("/")

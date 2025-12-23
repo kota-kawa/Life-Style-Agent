@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List
 
-import ai_engine_faiss as ai_engine
+from lifestyle_agent.core import rag_engine_faiss as ai_engine
 
 
 def run_rag_answer(question: str, *, persist_history: bool = True) -> Dict[str, Any]:

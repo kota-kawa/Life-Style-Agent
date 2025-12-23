@@ -4,7 +4,10 @@ import json
 import logging
 from datetime import datetime
 from typing import List, Optional
-from env_loader import load_secrets_env
+
+from lifestyle_agent.config.env import load_secrets_env
+from lifestyle_agent.config.model_selection import apply_model_selection, update_override
+from lifestyle_agent.config.paths import HISTORY_FILE, VDB_FAISS_DIR
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -12,8 +15,6 @@ from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_anthropic import ChatAnthropic
 from langchain_groq import ChatGroq
-
-from model_selection import apply_model_selection, update_override
 
 # ── 環境変数 ──
 load_secrets_env()
@@ -44,8 +45,7 @@ def refresh_llm(selection_override: dict | None = None):
 refresh_llm()
 
 # ── インデックス設定 ──
-INDEX_DB_DIR = "./home-topic-vdb"
-HISTORY_FILE = "conversation_history.json"
+INDEX_DB_DIR = VDB_FAISS_DIR
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "intfloat/multilingual-e5-large")
 EMBEDDING_DEVICE = os.getenv("EMBEDDING_DEVICE", "cpu")
 
@@ -66,7 +66,7 @@ def _clean_think_tags(text: str) -> str:
 
 
 def load_all_indices():
-    """./home-topic-vdb 以下を走査し、FAISS のインデックスを読み込む"""
+    """data/vdb/faiss 以下を走査し、FAISS のインデックスを読み込む"""
     if not os.path.exists(INDEX_DB_DIR):
         raise RuntimeError(f"Directory not found: {INDEX_DB_DIR}")
 
@@ -251,7 +251,7 @@ def get_answer(question: str, persist_history: bool = True):
 
 
 def reset_history():
-    """conversation_history.json を空にする"""
+    """data/conversation_history.json を空にする"""
     save_conversation_history([])
 
 

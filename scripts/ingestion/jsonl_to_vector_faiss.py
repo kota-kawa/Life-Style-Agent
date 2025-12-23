@@ -7,9 +7,11 @@ from langchain_core.documents import Document
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
+from lifestyle_agent.config.paths import QA_JSONL_DIR, VDB_FAISS_DIR
+
 # JSONL ファイルが配置されるディレクトリと、インデックスの永続化先ディレクトリ
-JSONL_DIR = "./docx_to_qa/qa_data_jsonl"
-INDEX_DB_DIR = "./home-topic-vdb"
+JSONL_DIR = str(QA_JSONL_DIR)
+INDEX_DB_DIR = str(VDB_FAISS_DIR)
 os.makedirs(INDEX_DB_DIR, exist_ok=True)
 
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "intfloat/multilingual-e5-large")

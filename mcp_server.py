@@ -6,8 +6,8 @@ import json
 import logging
 from typing import Any, Dict, List
 
-from env_loader import load_secrets_env
-from lifestyle_tools import analyze_conversation_payload, run_rag_answer
+from lifestyle_agent.api.mcp_tools import analyze_conversation_payload, run_rag_answer
+from lifestyle_agent.config.env import load_secrets_env
 
 try:
     import mcp.types as types
@@ -27,7 +27,7 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="rag_answer",
-            description="生活に関する質問に答えるツール。内部で ai_engine.get_answer を呼び出します。",
+            description="生活に関する質問に答えるツール。内部で rag_engine_faiss.get_answer を呼び出します。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -42,7 +42,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="analyze_conversation",
-            description="会話ログからサポートが必要か分析するツール。内部で ai_engine.analyze_external_conversation を呼び出します。",
+            description="会話ログからサポートが必要か分析するツール。内部で rag_engine_faiss.analyze_external_conversation を呼び出します。",
             inputSchema={
                 "type": "object",
                 "properties": {
