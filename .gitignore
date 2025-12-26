@@ -47,23 +47,8 @@ desktop.ini
 *.log
 
 # --- Project Specific: Runtime & Output ---
-# Runtime conversation history
-data/conversation_history.json
-
-# Generated Vector Databases (FAISS indices)
-# These are build artifacts and should generally be rebuilt from source
-data/vdb/faiss/
 constitution_vector_db/
 .constitution_vector_db/
-
-# Generated Static Outputs
-web/static/vector_db_*/
-web/static/sample_FAQ_*/
-output_jsonl/
-
-# Ingestion outputs
-data/evaluation/
-data/secrets/
 
 # --- Temporary/Binary Files ---
 *.pid
