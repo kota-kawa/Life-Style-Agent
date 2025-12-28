@@ -9,7 +9,7 @@ from typing import Dict, List, Tuple
 
 from lifestyle_agent.config.paths import ROOT_DIR
 
-DEFAULT_SELECTION = {"provider": "openai", "model": "gpt-5.1"}
+DEFAULT_SELECTION = {"provider": "groq", "model": "openai/gpt-oss-20b"}
 
 PROVIDER_DEFAULTS: Dict[str, Dict[str, str | List[str] | None]] = {
     "openai": {

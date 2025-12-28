@@ -20,24 +20,45 @@
   />
   <style>
     :root {
-      --primary: #4f9aff;
-      --primary-dark: #3a7dd4;
-      --bg: #f0f4fb;
-      --card-bg: #ffffff;
-      --user-msg: #cee4ff;
-      --bot-msg: #e5e5ea;
-      --radius: 12px;
-      --transition: 0.3s ease;
+      --bg: #f2f5f2;
+      --bg-deep: #e7efe8;
+      --surface: #ffffff;
+      --surface-strong: #f8faf7;
+      --ink: #1f2a26;
+      --muted: #5b6b63;
+      --primary: #0f7a6a;
+      --primary-strong: #0a5c50;
+      --accent: #ffb23f;
+      --user-msg: #d8f3ee;
+      --bot-msg: #f0f3f2;
+      --border: rgba(31, 42, 38, 0.12);
+      --shadow: 0 18px 40px rgba(20, 24, 22, 0.15);
+      --radius: 16px;
+      --radius-lg: 22px;
+      --transition: 0.25s ease;
     }
     * {
       box-sizing: border-box;
       margin: 0; padding: 0;
-      font-family: "Söhne", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+      font-family: "IBM Plex Sans", "Source Sans 3", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, "Segoe UI", sans-serif;
     }
     body {
-      background: var(--bg);
+      background: radial-gradient(1200px 600px at 15% -10%, #ffe6b7 0%, transparent 60%),
+                  radial-gradient(900px 600px at 110% 10%, #d9f4ee 0%, transparent 55%),
+                  linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
       display: flex; justify-content: center; align-items: center;
       min-height: 100vh; padding: 20px;
+      color: var(--ink);
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(15, 122, 106, 0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      opacity: 0.3;
+      z-index: -1;
     }
 
     /* ===== コンテナ ===== */
@@ -47,51 +68,94 @@
       max-height: 80vh;            /* 画面高さの80%を上限に */
       display: flex;
       flex-direction: column;
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
       overflow: hidden;            /* はみ出し部分を隠す */
+      border: 1px solid rgba(255, 255, 255, 0.6);
     }
     .header {
-      background: var(--primary);
+      background: linear-gradient(120deg, #0f7a6a 0%, #0c6a5c 55%, #0a5c50 100%);
       color: #fff;
-      padding: 16px;
+      padding: 16px 18px;
       text-align: center;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       position: relative;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #b9f5e5;
+      box-shadow: 0 0 8px rgba(185, 245, 229, 0.8);
+    }
+    .status-pill.error .status-dot {
+      background: #ff6b6b;
+      box-shadow: 0 0 8px rgba(255, 107, 107, 0.8);
+    }
+    .status-pill.loading .status-dot {
+      background: #ffd166;
+      box-shadow: 0 0 8px rgba(255, 209, 102, 0.8);
     }
     #model-selector {
       font-size: 0.9rem;
       padding: 4px 8px;
       border-radius: 4px;
-      border: 1px solid #fff;
-      background: var(--primary-dark);
+      border: 1px solid rgba(255,255,255,0.6);
+      background: rgba(10, 92, 80, 0.4);
       color: #fff;
       cursor: pointer;
+    }
+    #model-selector option {
+      background: #f8faf7;
+      color: #1f2a26;
     }
     .header .reset-btn {
       position: static;
       transform: none;
       background: none; border: none;
       color: #fff; cursor: pointer; font-size: 1.2rem;
-      transition: transform var(--transition);
+      transition: transform var(--transition), color var(--transition);
     }
     .header .reset-btn:hover {
-      transform: translateY(-50%) rotate(90deg);
+      transform: rotate(90deg);
+      color: #ffe8bd;
     }
 
     .summary-panel {
       padding: 16px;
-      background: #f6f8ff;
-      border-bottom: 1px solid #e1e8ff;
+      background: var(--surface-strong);
+      border-bottom: 1px solid var(--border);
       transition: border-color var(--transition), background var(--transition);
     }
     .summary-panel.collapsed {
       border-bottom-color: transparent;
-      background: #f1f4ff;
+      background: #f3f7f4;
     }
     .summary-header {
       display: flex;
@@ -103,7 +167,7 @@
     }
     .summary-title {
       font-weight: bold;
-      color: var(--primary-dark);
+      color: var(--primary-strong);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -117,7 +181,7 @@
       border: none;
       display: flex;
       align-items: center;
-      color: var(--primary-dark);
+      color: var(--primary-strong);
       font-size: 0.85rem;
       gap: 4px;
       cursor: pointer;
@@ -138,7 +202,7 @@
     .summary-content {
       font-size: 0.95rem;
       line-height: 1.6;
-      color: #333;
+      color: var(--muted);
       white-space: pre-wrap;
       word-break: break-word;
       margin-top: 8px;
@@ -162,11 +226,12 @@
     .chat-box {
       flex: 1;
       max-height: 60vh;            /* 画面高さの60%を上限に */
-      padding: 16px;
+      padding: 18px;
       overflow-y: auto;
-      background: #fafcff;
+      background: linear-gradient(180deg, #fbfdfc 0%, #f4f8f6 100%);
       scrollbar-width: thin;
       scrollbar-color: rgba(0,0,0,0.2) transparent;
+      position: relative;
     }
     .chat-box::-webkit-scrollbar { width: 6px; }
     .chat-box::-webkit-scrollbar-thumb {
@@ -176,7 +241,7 @@
 
     /* ===== メッセージ ===== */
     .message {
-      display: flex; margin: 8px 0; opacity: 0;
+      display: flex; margin: 10px 0; opacity: 0;
     }
     .message.user {
       justify-content: flex-end;
@@ -191,11 +256,18 @@
       max-width: 70%;
       padding: 12px 16px;
       border-radius: var(--radius);
-      line-height: 1.4;
+      line-height: 1.5;
       transition: background var(--transition);
+      box-shadow: 0 8px 18px rgba(20, 24, 22, 0.06);
     }
     .message.user .text { background: var(--user-msg); }
     .message.bot  .text { background: var(--bot-msg);  }
+    .message.user .text {
+      border-bottom-right-radius: 6px;
+    }
+    .message.bot .text {
+      border-bottom-left-radius: 6px;
+    }
 
     /* Markdown & Bot Message Styling */
     .message.bot .text {
@@ -265,28 +337,33 @@
       display: flex;
       padding: 12px;
       background: #fff;
-      border-top: 1px solid #eee;
+      border-top: 1px solid var(--border);
+      gap: 10px;
     }
     .input-area input {
       flex: 1;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: var(--radius) 0 0 var(--radius);
+      padding: 12px 14px;
+      border: 1px solid #d4dfda;
+      border-radius: var(--radius);
       transition: border-color var(--transition);
+      background: #fbfdfc;
+      color: var(--ink);
     }
     .input-area input:focus {
       border-color: var(--primary);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(15, 122, 106, 0.18);
     }
     .input-area button {
       width: 60px;
       border: none;
       background: var(--primary);
       color: #fff;
-      border-radius: 0 var(--radius) var(--radius) 0;
+      border-radius: var(--radius);
       cursor: pointer;
       display: flex; justify-content: center; align-items: center;
-      transition: background var(--transition), transform var(--transition);
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 8px 18px rgba(15, 122, 106, 0.22);
     }
     .input-area button svg {
       width: 20px; height: 20px;
@@ -294,10 +371,31 @@
       transition: transform var(--transition);
     }
     .input-area button:active {
-      background: var(--primary-dark);
+      background: var(--primary-strong);
     }
     .input-area button:active svg {
       transform: rotate(45deg);
+    }
+    .input-area button[disabled] {
+      cursor: not-allowed;
+      opacity: 0.65;
+      box-shadow: none;
+    }
+
+    .send-spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .input-area button.loading svg {
+      display: none;
+    }
+    .input-area button.loading .send-spinner {
+      display: inline-block;
     }
 
     /* ===== スピナー (チャット内) ===== */
@@ -318,12 +416,75 @@
       from { transform: rotate(0deg); }
       to   { transform: rotate(360deg); }
     }
+
+    .scroll-jump {
+      position: fixed;
+      right: 16px;
+      bottom: 20px;
+      border: none;
+      background: #fff;
+      color: var(--primary-strong);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      box-shadow: 0 12px 24px rgba(31, 42, 38, 0.16);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: opacity var(--transition), transform var(--transition);
+    }
+    .scroll-jump.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2a26;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      box-shadow: 0 12px 30px rgba(15, 16, 15, 0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition), transform var(--transition);
+      z-index: 20;
+    }
+    .toast.show {
+      opacity: 0.92;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    @media (max-width: 768px) {
+      .container { max-height: 90vh; }
+      .header { flex-direction: column; align-items: flex-start; }
+      #model-selector { width: 100%; }
+      .input-area { flex-direction: column; }
+      .input-area button { width: 100%; }
+      .chat-box { max-height: 55vh; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <span>Q&A Chat System</span>
+      <div class="header-title">
+        <span>Q&A Chat System</span>
+        <span id="status-pill" class="status-pill">
+          <span class="status-dot"></span>
+          <span class="status-label">online</span>
+        </span>
+      </div>
       <select id="model-selector">
         <optgroup label="OpenAI">
           <option value='{"provider": "openai", "model": "gpt-5.1"}'>GPT-5.1</option>
@@ -345,26 +506,29 @@
       </select>
       <button class="reset-btn" title="リセット">&#x21bb;</button>
     </div>
-    <div id="summary-panel" class="summary-panel">
+    <div id="summary-panel" class="summary-panel collapsed">
       <div class="summary-header" id="summary-toggle">
         <div class="summary-title">会話の要約</div>
-        <button type="button" class="summary-toggle" aria-expanded="true" aria-controls="conversation-summary">
-          <span class="summary-toggle-label">閉じる</span>
-          <span class="summary-toggle-icon">&#9650;</span>
+        <button type="button" class="summary-toggle" aria-expanded="false" aria-controls="conversation-summary">
+          <span class="summary-toggle-label">開く</span>
+          <span class="summary-toggle-icon">&#9660;</span>
         </button>
       </div>
       <div id="conversation-summary" class="summary-content" role="region" aria-live="polite">まだ会話はありません。</div>
     </div>
-    <div id="chat" class="chat-box"></div>
+    <div id="chat" class="chat-box" aria-live="polite"></div>
     <form id="chat-form" class="input-area">
       <input type="text" id="question" placeholder="質問を入力してください…" autocomplete="off" required />
       <button type="submit" title="送信">
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
         </svg>
+        <span class="send-spinner" aria-hidden="true"></span>
       </button>
     </form>
   </div>
+  <button id="scroll-jump" class="scroll-jump" type="button">最新へ</button>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
   <script>
@@ -379,8 +543,61 @@
     const summaryToggleButton = summaryToggle.querySelector('.summary-toggle');
     const summaryToggleLabel = summaryToggleButton.querySelector('.summary-toggle-label');
     const summaryToggleIcon = summaryToggleButton.querySelector('.summary-toggle-icon');
+    const statusPill = document.getElementById('status-pill');
+    const statusLabel = statusPill ? statusPill.querySelector('.status-label') : null;
+    const scrollJump = document.getElementById('scroll-jump');
+    const toast = document.getElementById('toast');
     const DEFAULT_SUMMARY_TEXT = 'まだ会話はありません。';
-    const DEFAULT_MODEL_SELECTION = { provider: 'openai', model: 'gpt-5.1' };
+    const DEFAULT_MODEL_SELECTION = { provider: 'groq', model: 'openai/gpt-oss-20b' };
+    const state = {
+      isSending: false,
+      isSummaryCollapsed: true,
+      autoScroll: true,
+      unreadCount: 0,
+      toastTimer: null
+    };
+
+    function setStatus(type, label) {
+      if (!statusPill || !statusLabel) return;
+      statusPill.classList.remove('loading', 'error');
+      if (type) statusPill.classList.add(type);
+      statusLabel.textContent = label;
+    }
+
+    function showToast(message) {
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      if (state.toastTimer) window.clearTimeout(state.toastTimer);
+      state.toastTimer = window.setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2400);
+    }
+
+    function setSending(isSending) {
+      state.isSending = isSending;
+      form.querySelector('button').disabled = isSending;
+      form.querySelector('button').classList.toggle('loading', isSending);
+      input.disabled = isSending;
+    }
+
+    function scrollToBottom({ force = false } = {}) {
+      if (force || state.autoScroll) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+        state.unreadCount = 0;
+        updateScrollJump();
+      }
+    }
+
+    function updateScrollJump() {
+      if (!scrollJump) return;
+      if (state.autoScroll) {
+        scrollJump.classList.remove('visible');
+      } else {
+        scrollJump.textContent = state.unreadCount > 0 ? `最新へ (${state.unreadCount})` : '最新へ';
+        scrollJump.classList.add('visible');
+      }
+    }
 
     async function hydrateModelSelector() {
       if (!modelSelector) return;
@@ -426,9 +643,10 @@
         });
         if (!res.ok) throw new Error('Failed to update model');
         console.log('Model updated successfully');
+        showToast('モデルを切り替えました。');
       } catch (err) {
         console.error('Error updating model:', err);
-        alert('モデルの切り替えに失敗しました。');
+        showToast('モデルの切り替えに失敗しました。');
       }
     });
 
@@ -445,8 +663,12 @@
           const role = (entry.role || '').toLowerCase() === 'user' ? 'user' : 'bot';
           appendMessage(role, entry.message || '');
         });
+        scrollToBottom({ force: true });
+        setStatus('', 'online');
       } catch (err) {
         console.error('会話履歴の取得に失敗しました:', err);
+        setStatus('error', 'offline');
+        showToast('会話履歴の取得に失敗しました。');
       }
     }
 
@@ -469,12 +691,14 @@
       } catch (err) {
         console.error('要約の取得に失敗しました:', err);
         summaryContent.textContent = '要約の取得中にエラーが発生しました。';
+        showToast('要約の取得に失敗しました。');
       } finally {
         summaryPanel.classList.remove('loading');
       }
     }
 
     function updateSummaryToggle(isCollapsed) {
+      state.isSummaryCollapsed = isCollapsed;
       summaryPanel.classList.toggle('collapsed', isCollapsed);
       summaryToggleButton.setAttribute('aria-expanded', String(!isCollapsed));
       summaryToggleLabel.textContent = isCollapsed ? '開く' : '閉じる';
@@ -486,6 +710,21 @@
       updateSummaryToggle(!isCurrentlyCollapsed);
     });
 
+    window.addEventListener('online', () => setStatus('', 'online'));
+    window.addEventListener('offline', () => setStatus('error', 'offline'));
+
+    chatBox.addEventListener('scroll', () => {
+      const threshold = 24;
+      const atBottom = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) <= threshold;
+      state.autoScroll = atBottom;
+      updateScrollJump();
+    });
+
+    scrollJump.addEventListener('click', () => {
+      state.autoScroll = true;
+      scrollToBottom({ force: true });
+    });
+
     fetchHistory();
     refreshSummary({ showLoading: true });
 
@@ -493,6 +732,8 @@
       e.preventDefault();
       const q = input.value.trim();
       if (!q) return;
+      setStatus('loading', 'typing');
+      setSending(true);
       appendMessage('user', q);
       input.value = '';
       // スピナー付きの空メッセージを追加
@@ -506,8 +747,13 @@
         const { answer } = await res.json();
         replaceSpinnerMessage(placeholder, answer);
         await refreshSummary();
+        setStatus('', 'online');
       } catch (err) {
         replaceSpinnerMessage(placeholder, 'エラー: ' + err.message);
+        setStatus('error', 'offline');
+        showToast('メッセージ送信に失敗しました。');
+      } finally {
+        setSending(false);
       }
     });
 
@@ -520,10 +766,11 @@
           chatBox.innerHTML = '';
           summaryContent.textContent = DEFAULT_SUMMARY_TEXT;
           await refreshSummary({ showLoading: true });
+          showToast('会話履歴をリセットしました。');
         }
-        else alert('リセットに失敗しました。');
+        else showToast('リセットに失敗しました。');
       } catch (err) {
-        alert('リセット中にエラー: ' + err.message);
+        showToast('リセット中にエラー: ' + err.message);
       }
     });
 
@@ -543,7 +790,15 @@
       }
       m.appendChild(t);
       chatBox.appendChild(m);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      if (!state.autoScroll && sender !== 'user') {
+        state.unreadCount += 1;
+      }
+      if (sender === 'user') {
+        state.autoScroll = true;
+        scrollToBottom({ force: true });
+      } else {
+        scrollToBottom();
+      }
     }
 
     function appendSpinnerMessage() {
@@ -560,7 +815,7 @@
       t.appendChild(wrapper);
       m.appendChild(t);
       chatBox.appendChild(m);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      scrollToBottom();
       return m;
     }
 
@@ -571,6 +826,7 @@
       } else {
         t.innerHTML = text;
       }
+      scrollToBottom();
     }
   </script>
 </body>
