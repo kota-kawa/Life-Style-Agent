@@ -21,7 +21,7 @@
 - Vector jobs read from the same `secrets.env`, so ensure the keys are exported before running any ingestion scripts. Optional: `data/secrets/ingestion.env` can override for ingestion-only runs.
 
 ## Build & Run Commands
-- Create a virtual environment with `python -m venv .venv && source .venv/bin/activate` (or reuse the checked-in `venv/` when allowed) and install dependencies via `pip install -r requirements.txt`.
+- Create a virtual environment with `python3.12 -m venv .venv && source .venv/bin/activate` (or reuse the checked-in `venv/` when allowed) and install dependencies via `pip install -r requirements.txt`.
 - Local dev server: `FLASK_ENV=development python app.py` (or `flask run` equivalent). The Docker stack can be launched with `docker compose up --build qasystem`.
 - Rebuild FAISS stores whenever the source corpus changes: run the relevant ingestion script (for example `python scripts/ingestion/docx_to_qa_jsonl.py` or `python scripts/ingestion/jsonl_to_vector_faiss.py`) and verify it writes only under the sanctioned vector folders.
 

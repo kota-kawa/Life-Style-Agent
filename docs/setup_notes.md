@@ -1,8 +1,9 @@
 # セットアップ/運用メモ
 
 ## 仮想環境
+Python 3.12 以上を推奨します。
 ```
-python3 -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate
 deactivate
 ```

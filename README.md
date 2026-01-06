@@ -47,8 +47,10 @@ Life-Style-Agentは、家庭生活における多様なトピックに関する�
 
 ### 1. 環境構築
 
+Python 3.12 以上を推奨します。
+
 ```bash
-python3 -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
