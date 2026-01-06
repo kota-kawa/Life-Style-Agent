@@ -7,7 +7,7 @@
   <link
     rel="icon"
     type="image/png"
-    href="{{ url_for('static', filename='favicon/home-assistant-favicon.png') }}"
+    href="{{ url_for('static', path='favicon/home-assistant-favicon.png') }}"
     sizes="512x512"
   />
   <!-- Bootstrap 5 CSS -->
@@ -602,7 +602,7 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
+  <script src="{{ url_for('static', path='js/marked.min.js') }}"></script>
   
   <script>
     // DOM Elements

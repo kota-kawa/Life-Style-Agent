@@ -6,17 +6,17 @@
   <link
     rel="icon"
     type="image/png"
-    href="{{ url_for('static', filename='favicon/home-assistant-favicon.png') }}"
+    href="{{ url_for('static', path='favicon/home-assistant-favicon.png') }}"
     sizes="512x512"
   />
   <link
     rel="icon"
     type="image/x-icon"
-    href="{{ url_for('static', filename='favicon/home-assistant-favicon.ico') }}"
+    href="{{ url_for('static', path='favicon/home-assistant-favicon.ico') }}"
   />
   <link
     rel="apple-touch-icon"
-    href="{{ url_for('static', filename='favicon/home-assistant-favicon.png') }}"
+    href="{{ url_for('static', path='favicon/home-assistant-favicon.png') }}"
   />
   <style>
     :root {
@@ -530,7 +530,7 @@
   <button id="scroll-jump" class="scroll-jump" type="button">最新へ</button>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
+  <script src="{{ url_for('static', path='js/marked.min.js') }}"></script>
   <script>
     const chatBox = document.getElementById('chat');
     const form    = document.getElementById('chat-form');
