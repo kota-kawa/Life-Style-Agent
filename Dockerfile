@@ -21,9 +21,8 @@ COPY . /app
 
 EXPOSE 5000
 
-# Flask env vars
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=development
+# FastAPI env vars
+ENV PYTHONUNBUFFERED=1
 
 # Use the python in the venv (which is now in PATH)
-CMD ["flask", "run", "--host=0.0.0.0", "--port=5000", "--reload"]
+CMD ["uvicorn", "app:app", "--host=0.0.0.0", "--port=5000", "--reload"]

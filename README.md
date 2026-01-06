@@ -17,7 +17,7 @@ Life-Style-Agentは、家庭生活における多様なトピックに関する�
 
 ## 🛠 技術スタック
 
-- **Backend:** Flask (Python)
+- **Backend:** FastAPI (Python)
 - **Vector DB:** FAISS
 - **Embeddings:** HuggingFace (`intfloat/multilingual-e5-large`)
 - **Frameworks:** LangChain, LlamaIndex
@@ -28,7 +28,7 @@ Life-Style-Agentは、家庭生活における多様なトピックに関する�
 
 ```text
 .
-├── app.py                # Flask Webアプリケーションのエントリポイント
+├── app.py                # FastAPI Webアプリケーションのエントリポイント
 ├── mcp_server.py         # MCPサーバーの実装
 ├── lifestyle_agent/      # コアロジック
 │   ├── core/             # RAGエンジン (FAISS)

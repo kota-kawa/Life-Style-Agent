@@ -37,7 +37,7 @@ def _normalise_conversation_history(raw_history: Any) -> List[Dict[str, str]]:
 def analyze_conversation_payload(raw_history: Any) -> Dict[str, Any]:
     """
     Analyse a conversation log and, if useful, fetch a support message from the VDB.
-    Mirrors the HTTP endpoint behaviour so MCP and Flask stay in sync.
+    Mirrors the HTTP endpoint behaviour so MCP and the FastAPI server stay in sync.
     """
 
     conversation_history = _normalise_conversation_history(raw_history)

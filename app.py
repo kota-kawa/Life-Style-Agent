@@ -1,4 +1,4 @@
-# flask_app.py
+# fastapi_app.py
 import asyncio
 import json
 import logging
@@ -6,11 +6,15 @@ import os
 import queue
 import threading
 import uuid
+from functools import partial
 
 import anyio
 import requests
-from flask import Flask, Response, jsonify, render_template, request, stream_with_context
-from flask_cors import CORS
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from mcp.types import JSONRPCMessage
 
 from lifestyle_agent.api.mcp_tools import analyze_conversation_payload, run_rag_answer
@@ -21,26 +25,23 @@ from lifestyle_agent.core import rag_engine_faiss as ai_engine
 from lifestyle_agent.evaluation import manager as evaluation_manager
 from mcp_server import mcp_server
 
-# ── 環境変数 / Flask 初期化 ──
+# ── 環境変数 / FastAPI 初期化 ──
 load_secrets_env()
-app = Flask(__name__, template_folder=str(TEMPLATES_DIR), static_folder=str(STATIC_DIR))
-app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
 logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("lifestyle_agent.api")
+
+app = FastAPI()
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 _PLATFORM_BASE = os.getenv("MULTI_AGENT_PLATFORM_BASE", "http://web:5050").rstrip("/")
 _MCP_SESSIONS: dict[str, queue.Queue] = {}
-
-
-@app.after_request
-def add_cors_headers(response):
-    """Allow all domains to access the API without altering existing logic."""
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    request_headers = request.headers.get("Access-Control-Request-Headers")
-    if request_headers:
-        response.headers["Access-Control-Allow-Headers"] = request_headers
-    else:
-        response.headers.setdefault("Access-Control-Allow-Headers", "Content-Type")
-    return response
 
 
 def _notify_platform(selection: dict) -> None:
@@ -55,165 +56,183 @@ def _notify_platform(selection: dict) -> None:
         headers = {"X-Agent-Origin": "lifestyle"}
         res = requests.post(url, json=payload, headers=headers, timeout=2.0)
         if not res.ok:
-            app.logger.info("Platform model sync skipped (%s %s)", res.status_code, res.text)
+            logger.info("Platform model sync skipped (%s %s)", res.status_code, res.text)
     except requests.exceptions.RequestException as exc:
-        app.logger.info("Platform model sync skipped (%s)", exc)
+        logger.info("Platform model sync skipped (%s)", exc)
+
+
+def _json_error(message: str, status_code: int) -> JSONResponse:
+    return JSONResponse({"error": message}, status_code=status_code)
+
+
+async def _read_json(request: Request) -> dict | None:
+    try:
+        data = await request.json()
+    except Exception:
+        return None
+    return data if isinstance(data, dict) else None
 
 
 # ── Evaluation Routes ──
-@app.route("/evaluation")
-def evaluation_page():
-    return render_template("evaluation.html")
+@app.get("/evaluation", response_class=HTMLResponse)
+async def evaluation_page(request: Request):
+    return templates.TemplateResponse("evaluation.html", {"request": request})
 
-@app.route("/api/evaluation/data", methods=["GET"])
-def get_eval_data():
-    return jsonify({
+
+@app.get("/api/evaluation/data")
+async def get_eval_data():
+    return {
         "tasks": evaluation_manager.get_tasks(),
-        "results": evaluation_manager.get_results()
-    })
+        "results": evaluation_manager.get_results(),
+    }
 
-@app.route("/api/evaluation/tasks", methods=["POST", "DELETE"])
-def manage_eval_tasks():
+
+@app.api_route("/api/evaluation/tasks", methods=["POST", "DELETE"])
+async def manage_eval_tasks(request: Request):
     if request.method == "DELETE":
         evaluation_manager.clear_data()
-        return jsonify({"status": "cleared"})
-    
-    data = request.get_json() or {}
+        return {"status": "cleared"}
+
+    data = await _read_json(request) or {}
     action = data.get("action")
     if action == "add_samples":
         evaluation_manager.add_tasks(evaluation_manager.SAMPLE_TASKS)
-        return jsonify({"status": "added"})
-    
-    return jsonify({"error": "Invalid action"}), 400
+        return {"status": "added"}
 
-@app.route("/api/evaluation/run", methods=["POST"])
-def run_eval_task():
-    data = request.get_json() or {}
+    return _json_error("Invalid action", 400)
+
+
+@app.post("/api/evaluation/run")
+async def run_eval_task(request: Request):
+    data = await _read_json(request) or {}
     task_id = data.get("task_id")
     if not task_id:
-        return jsonify({"error": "task_id required"}), 400
-    
+        return _json_error("task_id required", 400)
+
     tasks = evaluation_manager.get_tasks()
     task = next((t for t in tasks if t["id"] == task_id), None)
     if not task:
-        return jsonify({"error": "Task not found"}), 404
+        return _json_error("Task not found", 404)
 
-    # Run RAG
     try:
-        # Get current model info
         selection = current_selection("lifestyle")
         model_name = selection.get("model", "unknown")
-        
-        # Execute RAG (no persistence)
-        rag_result = run_rag_answer(task["question"], persist_history=False)
+
+        rag_result = await anyio.to_thread.run_sync(
+            partial(run_rag_answer, task["question"], persist_history=False),
+        )
         actual_answer = rag_result.get("answer", "")
-        
-        # Record result
+
         result = evaluation_manager.add_result(
             task_id=task_id,
             model=model_name,
             question=task["question"],
             expected_answer=task["expected_answer"],
-            actual_answer=actual_answer
+            actual_answer=actual_answer,
         )
-        return jsonify({"result": result})
-    except Exception as e:
-        app.logger.exception("Evaluation run failed")
-        return jsonify({"error": str(e)}), 500
+        return {"result": result}
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Evaluation run failed: %s", exc)
+        return _json_error(str(exc), 500)
 
-@app.route("/api/evaluation/status", methods=["POST"])
-def update_eval_status():
-    data = request.get_json() or {}
+
+@app.post("/api/evaluation/status")
+async def update_eval_status(request: Request):
+    data = await _read_json(request) or {}
     result_id = data.get("result_id")
     status = data.get("status")
     if not result_id or not status:
-        return jsonify({"error": "Missing result_id or status"}), 400
-    
+        return _json_error("Missing result_id or status", 400)
+
     evaluation_manager.update_result_status(result_id, status)
-    return jsonify({"status": "updated"})
+    return {"status": "updated"}
 
 
-@app.route("/rag_answer", methods=["POST"])
-def rag_answer():
+@app.post("/rag_answer")
+async def rag_answer(request: Request):
     """POST: { "question": "..." } → RAG で回答"""
-    data = request.get_json() or {}
-    question = data.get("question", "").strip()
+    data = await _read_json(request) or {}
+    question = (data.get("question") or "").strip()
     if not question:
-        return jsonify({"error": "質問を入力してください"}), 400
+        return _json_error("質問を入力してください", 400)
     try:
-        result = run_rag_answer(question)
-        return jsonify(result)
-    except Exception as e:
-        app.logger.exception("Error during query processing:")
-        return jsonify({"error": str(e)}), 500
+        result = await anyio.to_thread.run_sync(run_rag_answer, question)
+        return result
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Error during query processing: %s", exc)
+        return _json_error(str(exc), 500)
 
 
-@app.route("/agent_rag_answer", methods=["POST"])
-def agent_rag_answer():
+@app.post("/agent_rag_answer")
+async def agent_rag_answer(request: Request):
     """他エージェントからの問い合わせに応答するが、会話履歴には保存しない"""
-    data = request.get_json() or {}
-    question = data.get("question", "").strip()
+    data = await _read_json(request) or {}
+    question = (data.get("question") or "").strip()
     if not question:
-        return jsonify({"error": "質問を入力してください"}), 400
+        return _json_error("質問を入力してください", 400)
     try:
-        result = run_rag_answer(question, persist_history=False)
-        return jsonify(result)
-    except Exception as e:
-        app.logger.exception("Error during external agent query processing:")
-        return jsonify({"error": str(e)}), 500
+        result = await anyio.to_thread.run_sync(
+            partial(run_rag_answer, question, persist_history=False)
+        )
+        return result
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Error during external agent query processing: %s", exc)
+        return _json_error(str(exc), 500)
 
 
-@app.route("/reset_history", methods=["POST"])
-def reset_history():
+@app.post("/reset_history")
+async def reset_history():
     """会話履歴をリセット"""
-    ai_engine.reset_history()
-    return jsonify({"status": "Conversation history reset."})
+    await anyio.to_thread.run_sync(ai_engine.reset_history)
+    return {"status": "Conversation history reset."}
 
 
-@app.route("/conversation_history", methods=["GET"])
-def conversation_history():
-    history = ai_engine.get_conversation_history()
-    return jsonify({"conversation_history": history})
+@app.get("/conversation_history")
+async def conversation_history():
+    history = await anyio.to_thread.run_sync(ai_engine.get_conversation_history)
+    return {"conversation_history": history}
 
 
-@app.route("/conversation_summary", methods=["GET"])
-def conversation_summary():
+@app.get("/conversation_summary")
+async def conversation_summary():
     try:
-        summary = ai_engine.get_conversation_summary()
-        return jsonify({"summary": summary})
-    except Exception as e:
-        app.logger.exception("Error during conversation summarization:")
-        return jsonify({"error": "会話の要約中にエラーが発生しました"}), 500
+        summary = await anyio.to_thread.run_sync(ai_engine.get_conversation_summary)
+        return {"summary": summary}
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Error during conversation summarization: %s", exc)
+        return _json_error("会話の要約中にエラーが発生しました", 500)
 
 
-@app.route("/model_settings", methods=["GET", "POST"])
-def update_model_settings():
+@app.api_route("/model_settings", methods=["GET", "POST"])
+async def update_model_settings(request: Request):
     """Update or expose the active LLM model without restarting the service."""
 
     if request.method == "GET":
         selection = current_selection("lifestyle")
-        return jsonify({"selection": {
-            "provider": selection.get("provider"),
-            "model": selection.get("model"),
-            "base_url": selection.get("base_url"),
-        }})
+        return {
+            "selection": {
+                "provider": selection.get("provider"),
+                "model": selection.get("model"),
+                "base_url": selection.get("base_url"),
+            }
+        }
 
-    data = request.get_json(silent=True) or {}
+    data = await _read_json(request) or {}
     selection = data if isinstance(data, dict) else {}
     try:
         update_override(selection if selection else None)
-        ai_engine.refresh_llm(selection if selection else None)
+        await anyio.to_thread.run_sync(ai_engine.refresh_llm, selection if selection else None)
         if request.headers.get("X-Platform-Propagation") != "1" and selection:
-            _notify_platform(selection)
+            await anyio.to_thread.run_sync(_notify_platform, selection)
     except Exception as exc:  # noqa: BLE001
-        app.logger.exception("Failed to refresh model settings: %s", exc)
-        return jsonify({"error": "モデル設定の更新に失敗しました。"}), 500
-    return jsonify({"status": "ok", "applied": selection or "from_file"})
+        logger.exception("Failed to refresh model settings: %s", exc)
+        return _json_error("モデル設定の更新に失敗しました。", 500)
+    return {"status": "ok", "applied": selection or "from_file"}
 
 
 # --- MCP Server Bridge ---
-@app.route("/mcp/sse")
-def mcp_sse_endpoint():
+@app.get("/mcp/sse")
+async def mcp_sse_endpoint():
     session_id = str(uuid.uuid4())
     input_queue: queue.Queue = queue.Queue()
     output_queue: queue.Queue = queue.Queue()
@@ -234,7 +253,7 @@ def mcp_sse_endpoint():
                             parsed = JSONRPCMessage.model_validate(msg)
                             await read_stream_send.send(parsed)
                         except Exception as exc:  # noqa: BLE001
-                            app.logger.warning("MCP Parse Error: %s", exc)
+                            logger.warning("MCP Parse Error: %s", exc)
                     except Exception:  # noqa: BLE001 - defensive loop guard
                         break
                 await read_stream_send.aclose()
@@ -248,7 +267,7 @@ def mcp_sse_endpoint():
                             else:
                                 data = json.dumps(msg)
                         except Exception as exc:  # noqa: BLE001
-                            app.logger.warning("MCP serialization error: %s", exc)
+                            logger.warning("MCP serialization error: %s", exc)
                             continue
                         output_queue.put(f"event: message\ndata: {data}\n\n")
                 output_queue.put(None)
@@ -265,7 +284,7 @@ def mcp_sse_endpoint():
                         initialization_options=mcp_server.create_initialization_options(),
                     )
                 except Exception as exc:  # noqa: BLE001
-                    app.logger.exception("MCP Run Error: %s", exc)
+                    logger.exception("MCP Run Error: %s", exc)
 
         try:
             asyncio.run(run())
@@ -284,24 +303,25 @@ def mcp_sse_endpoint():
             except queue.Empty:
                 yield ": keepalive\n\n"
 
-    return Response(stream_with_context(generate()), mimetype="text/event-stream")
+    return StreamingResponse(generate(), media_type="text/event-stream")
 
 
-@app.route("/mcp/messages", methods=["POST"])
-def mcp_messages_endpoint():
-    session_id = request.args.get("session_id")
+@app.post("/mcp/messages")
+async def mcp_messages_endpoint(request: Request):
+    session_id = request.query_params.get("session_id")
     if not session_id or session_id not in _MCP_SESSIONS:
-        return jsonify({"error": "Session not found"}), 404
+        return _json_error("Session not found", 404)
 
-    _MCP_SESSIONS[session_id].put(request.json)
-    return jsonify({"status": "accepted"}), 202
+    payload = await _read_json(request)
+    _MCP_SESSIONS[session_id].put(payload)
+    return JSONResponse({"status": "accepted"}, status_code=202)
 
 
-@app.route("/analyze_conversation", methods=["POST"])
-def analyze_conversation():
+@app.post("/analyze_conversation")
+async def analyze_conversation(request: Request):
     """
     外部エージェントから会話履歴を受け取り、VDBの知識で解決できる問題があれば支援メッセージを返す。
-    
+
     リクエスト形式:
     {
         "conversation_history": [
@@ -309,7 +329,7 @@ def analyze_conversation():
             {"role": "AI", "message": "..."}
         ]
     }
-    
+
     レスポンス形式:
     {
         "analyzed": true,
@@ -320,35 +340,38 @@ def analyze_conversation():
     }
     """
     try:
-        data = request.get_json()
-    except Exception as e:
-        app.logger.exception("Error parsing JSON:")
-        return jsonify({"error": "無効なJSON形式です"}), 400
-    
+        data = await request.json()
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Error parsing JSON: %s", exc)
+        return _json_error("無効なJSON形式です", 400)
+
     if data is None:
-        return jsonify({"error": "リクエストボディが必要です"}), 400
-    
+        return _json_error("リクエストボディが必要です", 400)
+
     conversation_history = data.get("history") or data.get("conversation_history") or []
-    
+
     if not conversation_history:
-        return jsonify({"error": "会話履歴が空です"}), 400
-    
+        return _json_error("会話履歴が空です", 400)
+
     try:
-        response = analyze_conversation_payload(conversation_history)
-        return jsonify(response)
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-    except Exception:
-        app.logger.exception("Error during conversation analysis:")
-        return jsonify({"error": "会話の分析中にエラーが発生しました"}), 500
+        response = await anyio.to_thread.run_sync(
+            analyze_conversation_payload, conversation_history
+        )
+        return response
+    except ValueError as exc:
+        return _json_error(str(exc), 400)
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Error during conversation analysis: %s", exc)
+        return _json_error("会話の分析中にエラーが発生しました", 500)
 
 
-@app.route("/")
-def index():
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
     """トップページ（テンプレートは従来どおり）"""
-    return render_template("index.html")
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 if __name__ == "__main__":
-    # インデックス読み込みは ai_engine 側で一度だけ行われる
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    import uvicorn
+
+    uvicorn.run("app:app", host="0.0.0.0", port=5000, reload=True)

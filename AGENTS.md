@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Architecture & Module Ownership
-- `app.py` is the single Flask entrypoint. It wires CORS, loads environment secrets, and exposes the HTTP APIs consumed by the UI and other agents:
+- `app.py` is the single FastAPI entrypoint. It wires CORS, loads environment secrets, and exposes the HTTP APIs consumed by the UI and other agents:
   - `/rag_answer` stores the exchanged turns and powers the user chat.
   - `/agent_rag_answer` serves peer agents without touching the persisted history.
   - `/reset_history`, `/conversation_history`, and `/conversation_summary` manage/chat through `data/conversation_history.json`.
@@ -14,7 +14,7 @@
 - Shared path constants live in `lifestyle_agent/config/paths.py`. Update that file first when relocating data, static assets, or templates.
 - Front-end assets live under `web/templates/` and `web/static/` (we currently only ship inline styles/JS). The UI expects JSON responses exactly as implemented in `app.py`; breaking shapes will surface immediately in fetch handlers.
 - Data ingestion utilities live under `scripts/ingestion/`. Persist FAISS artifacts under `data/vdb/faiss/` and JSONL outputs under `data/qa_jsonl/`.
-- Docker tooling (`Dockerfile`, `docker-compose.yml`) mirrors the local workflow: the `qasystem` service runs `flask run` with reload and attaches to the external `${MULTI_AGENT_NETWORK}` for agent-to-agent calls.
+- Docker tooling (`Dockerfile`, `docker-compose.yml`) mirrors the local workflow: the `qasystem` service runs `uvicorn` with reload and attaches to the external `${MULTI_AGENT_NETWORK}` for agent-to-agent calls.
 
 ## Configuration & Secrets
 - Put secrets in `secrets.env` (see `docs/setup_notes.md` for pointers). `GOOGLE_API_KEY`, `GEMINI_API_KEY`, or `OPENAI_API_KEY` must be defined; whichever exists first bootstraps both Gemini and LangChain's OpenAI client. Optional overrides: `OPENAI_BASE_URL`/`OPENAI_API_BASE`, `EMBEDDING_MODEL_NAME`, `EMBEDDING_DEVICE`.
@@ -22,7 +22,7 @@
 
 ## Build & Run Commands
 - Install dependencies and create a virtual environment with `uv sync`. To run scripts, use `uv run <script>` or activate the environment with `source .venv/bin/activate`.
-- Local dev server: `FLASK_ENV=development python app.py` (or `flask run` equivalent). The Docker stack can be launched with `docker compose up --build qasystem`.
+- Local dev server: `python app.py` (uvicorn reload enabled). The Docker stack can be launched with `docker compose up --build qasystem`.
 - Rebuild FAISS stores whenever the source corpus changes: run the relevant ingestion script (for example `python scripts/ingestion/docx_to_qa_jsonl.py` or `python scripts/ingestion/jsonl_to_vector_faiss.py`) and verify it writes only under the sanctioned vector folders.
 
 ## Coding Style & Naming Conventions
