@@ -47,12 +47,11 @@ Life-Style-Agentは、家庭生活における多様なトピックに関する�
 
 ### 1. 環境構築
 
-Python 3.12 以上を推奨します。
+Python 3.12 以上、および [uv](https://docs.astral.sh/uv/) が必要です。
 
 ```bash
-python3.12 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+# 依存関係のインストール（仮想環境も自動作成されます）
+uv sync
 ```
 
 ### 2. 環境変数の設定
