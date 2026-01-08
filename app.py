@@ -203,6 +203,18 @@ async def conversation_summary():
         return _json_error("会話の要約中にエラーが発生しました", 500)
 
 
+@app.get("/agent-result", response_class=HTMLResponse)
+async def agent_result_page(request: Request):
+    """会話の要約のみを表示するページ"""
+    try:
+        summary = await anyio.to_thread.run_sync(ai_engine.get_conversation_summary)
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Error getting summary for agent result page: %s", exc)
+        summary = "要約の取得中にエラーが発生しました。"
+
+    return templates.TemplateResponse("agent_result.html", {"request": request, "summary": summary})
+
+
 @app.api_route("/model_settings", methods=["GET", "POST"])
 async def update_model_settings(request: Request):
     """Update or expose the active LLM model without restarting the service."""
