@@ -6,7 +6,7 @@ import json
 import logging
 from typing import Any, Dict, List
 
-from lifestyle_agent.api.mcp_tools import analyze_conversation_payload, run_rag_answer
+from lifestyle_agent.api.mcp_tools import run_rag_answer
 from lifestyle_agent.config.env import load_secrets_env
 
 try:
@@ -40,25 +40,6 @@ async def list_tools() -> list[Tool]:
                 "required": ["question"],
             },
         ),
-        Tool(
-            name="analyze_conversation",
-            description="会話ログからサポートが必要か分析するツール。内部で rag_engine_faiss.analyze_external_conversation を呼び出します。",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "conversation_history": {
-                        "type": "array",
-                        "items": {"type": "object"},
-                        "description": "role と message を含む会話履歴",
-                    },
-                    "history": {
-                        "type": "array",
-                        "items": {"type": "object"},
-                        "description": "conversation_history のエイリアス",
-                    },
-                },
-            },
-        ),
     ]
 
 
@@ -86,17 +67,6 @@ async def call_tool(name: str, arguments: Any) -> List[types.TextContent]:
             return [_text_payload(result)]
         except Exception as exc:  # noqa: BLE001
             logging.exception("MCP rag_answer failed: %s", exc)
-            return [_text_payload({"error": str(exc)})]
-
-    if name == "analyze_conversation":
-        history = []
-        if isinstance(arguments, dict):
-            history = arguments.get("conversation_history") or arguments.get("history") or []
-        try:
-            result = analyze_conversation_payload(history)
-            return [_text_payload(result)]
-        except Exception as exc:  # noqa: BLE001
-            logging.exception("MCP analyze_conversation failed: %s", exc)
             return [_text_payload({"error": str(exc)})]
 
     raise ValueError(f"Tool not found: {name}")

@@ -5,12 +5,11 @@
   - `/rag_answer` stores the exchanged turns and powers the user chat.
   - `/agent_rag_answer` serves peer agents without touching the persisted history.
   - `/reset_history`, `/conversation_history`, and `/conversation_summary` manage/chat through `data/conversation_history.json`.
-  - `/analyze_conversation` inspects an external transcript and, when家庭科系の知識で解決できると判断した場合, turns it into a concrete VDB query plus support message.
   - `/` renders `web/templates/index.html`, whose inline JS handles the summary accordion, optimistic chat updates, loading spinners, and fetches listed above.
-- `mcp_server.py` exposes `/mcp/sse` + `/mcp/messages` bridges for MCP clients and defines the `rag_answer` / `analyze_conversation` tools backed by the same logic as the HTTP APIs (install via `pip install "mcp[cli]"`).
+- `mcp_server.py` exposes `/mcp/sse` + `/mcp/messages` bridges for MCP clients and defines the `rag_answer` tool backed by the same logic as the HTTP APIs (install via `pip install "mcp[cli]"`).
 - Retrieval and reasoning live in `lifestyle_agent/core/rag_engine_faiss.py`. It loads every `data/vdb/faiss/*/persist` FAISS store with `HuggingFaceEmbeddings` (`intfloat/multilingual-e5-large` on `EMBEDDING_DEVICE`), queries with `vector_retriever`, and calls the provider set by `lifestyle_agent/config/model_selection.py`.
   - `data/conversation_history.json` stores alternating `User`/`AI` turns; `reset_history()` clears it and the summary endpoint reuses the same file.
-  - `get_conversation_summary()` and `analyze_external_conversation()` each run bespoke prompts so tweaks there must respect the JSON contracts in `app.py`.
+  - `get_conversation_summary()` runs a bespoke prompt so tweaks there must respect the JSON contracts in `app.py`.
 - Shared path constants live in `lifestyle_agent/config/paths.py`. Update that file first when relocating data, static assets, or templates.
 - Front-end assets live under `web/templates/` and `web/static/` (we currently only ship inline styles/JS). The UI expects JSON responses exactly as implemented in `app.py`; breaking shapes will surface immediately in fetch handlers.
 - Data ingestion utilities live under `scripts/ingestion/`. Persist FAISS artifacts under `data/vdb/faiss/` and JSONL outputs under `data/qa_jsonl/`.
@@ -26,7 +25,7 @@
 - Rebuild FAISS stores whenever the source corpus changes: run the relevant ingestion script (for example `python scripts/ingestion/docx_to_qa_jsonl.py` or `python scripts/ingestion/jsonl_to_vector_faiss.py`) and verify it writes only under the sanctioned vector folders.
 
 ## Coding Style & Naming Conventions
-- Follow PEP 8 with 4-space indentation; prefer explicit imports and descriptive helpers (e.g., `get_conversation_summary`, `analyze_external_conversation`).
+- Follow PEP 8 with 4-space indentation; prefer explicit imports and descriptive helpers (e.g., `get_conversation_summary`).
 - Use snake_case for Python identifiers, kebab-case for CLI entry points, and keep HTML ids/classes consistent with the dash-delimited patterns already present in `web/templates/index.html`.
 - Front-end changes should remain vanilla JS/CSS unless there is a strong reason otherwise; keep animations/lightweight DOM helpers readable and progressively enhanced.
 - Run `black` on large edits and lint via `python -m compileall` until additional tooling lands.
@@ -36,7 +35,7 @@
 - Smoke tests to run after app or retrieval changes:
   - `curl -X POST localhost:5000/rag_answer -H 'Content-Type: application/json' -d '{"question":"..."}` should return `{answer,sources}` and append to `data/conversation_history.json`.
   - `curl -X POST localhost:5000/agent_rag_answer ...` must succeed without modifying history.
-  - `curl localhost:5000/conversation_summary` verifies the summarizer output, and `curl -X POST localhost:5000/analyze_conversation` with a crafted transcript should either surface `"needs_help": true` plus `support_message` or cleanly decline.
+  - `curl localhost:5000/conversation_summary` verifies the summarizer output.
 - Update `evaluation/query_pipeline_stats.json` or any other benchmark artifacts whenever retrieval/ranking behavior changes.
 
 ## Commit & Pull Request Guidelines

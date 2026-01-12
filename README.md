@@ -87,7 +87,6 @@ python app.py
 `mcp_server.py` を通じて、MCP対応クライアント（Clineなど）から以下のツールを利用できます。
 
 - `rag_answer`: 生活に関する質問に回答。
-- `analyze_conversation`: 会話ログからサポートの必要性を分析。
 
 ### Dockerでの実行
 

@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from mcp.types import JSONRPCMessage
 
-from lifestyle_agent.api.mcp_tools import analyze_conversation_payload, run_rag_answer
+from lifestyle_agent.api.mcp_tools import run_rag_answer
 from lifestyle_agent.config.env import load_secrets_env
 from lifestyle_agent.config.model_selection import current_selection, update_override
 from lifestyle_agent.config.paths import STATIC_DIR, TEMPLATES_DIR
@@ -327,54 +327,6 @@ async def mcp_messages_endpoint(request: Request):
     payload = await _read_json(request)
     _MCP_SESSIONS[session_id].put(payload)
     return JSONResponse({"status": "accepted"}, status_code=202)
-
-
-@app.post("/analyze_conversation")
-async def analyze_conversation(request: Request):
-    """
-    外部エージェントから会話履歴を受け取り、VDBの知識で解決できる問題があれば支援メッセージを返す。
-
-    リクエスト形式:
-    {
-        "conversation_history": [
-            {"role": "User", "message": "..."},
-            {"role": "AI", "message": "..."}
-        ]
-    }
-
-    レスポンス形式:
-    {
-        "analyzed": true,
-        "needs_help": true/false,
-        "problem": "特定された問題" (needs_helpがtrueの場合),
-        "support_message": "支援メッセージ" (needs_helpがtrueの場合),
-        "sources": [...] (needs_helpがtrueの場合)
-    }
-    """
-    try:
-        data = await request.json()
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("Error parsing JSON: %s", exc)
-        return _json_error("無効なJSON形式です", 400)
-
-    if data is None:
-        return _json_error("リクエストボディが必要です", 400)
-
-    conversation_history = data.get("history") or data.get("conversation_history") or []
-
-    if not conversation_history:
-        return _json_error("会話履歴が空です", 400)
-
-    try:
-        response = await anyio.to_thread.run_sync(
-            analyze_conversation_payload, conversation_history
-        )
-        return response
-    except ValueError as exc:
-        return _json_error(str(exc), 400)
-    except Exception as exc:  # noqa: BLE001
-        logger.exception("Error during conversation analysis: %s", exc)
-        return _json_error("会話の分析中にエラーが発生しました", 500)
 
 
 @app.get("/", response_class=HTMLResponse)
