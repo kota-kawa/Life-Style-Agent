@@ -1,5 +1,7 @@
 # Life-Style-Agent
 
+[日本語](README.md) | [English](README_en.md)
+
 <img src="static/Life-Style-Agent-Logo.png" width="800">
 
 Life-Style-Agentは、家庭生活における多様なトピックに関する質問に答えるための、RAG（Retrieval-Augmented Generation）エンジンを備えた知的エージェントです。
