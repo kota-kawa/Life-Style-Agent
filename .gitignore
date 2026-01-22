@@ -60,3 +60,7 @@ constitution_vector_db/
 # Note: We removed blanket ignores for *.json, *.txt, *.docx, *.pdf 
 # to allow tracking of source data and requirements.
 *.Identifier
+
+# --- Secrets and Privacy ---
+data/secrets/
+data/conversation_history.json
