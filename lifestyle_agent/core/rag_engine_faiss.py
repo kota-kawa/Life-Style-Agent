@@ -8,6 +8,7 @@ from typing import List, Optional
 from lifestyle_agent.config.env import load_secrets_env
 from lifestyle_agent.config.model_selection import apply_model_selection, update_override
 from lifestyle_agent.config.paths import HISTORY_FILE, VDB_FAISS_DIR
+from lifestyle_agent.core import prompt_guard
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -181,14 +182,25 @@ def _format_history_for_prompt(history: List[dict]) -> str:
 
 def get_answer(question: str, persist_history: bool = True):
     """質問文字列を受け取り、RAG 結果（answer, sources）を返す"""
-    if vector_retriever is None:
-        raise RuntimeError("FAISS インデックスが初期化されていません。")
-
     question = question.strip()
     if not question:
         raise ValueError("質問を入力してください。")
 
     history = load_conversation_history()
+
+    guard_decision = prompt_guard.evaluate_prompt_guard(question)
+    if guard_decision.block:
+        final = prompt_guard.guard_refusal_message(guard_decision)
+        if persist_history:
+            updated_history = history + [
+                {"role": "User", "message": question},
+                {"role": "AI", "message": final},
+            ]
+            save_conversation_history(updated_history)
+        return final, []
+
+    if vector_retriever is None:
+        raise RuntimeError("FAISS インデックスが初期化されていません。")
 
     retrieved_docs = vector_retriever.get_relevant_documents(question)
 
@@ -296,4 +308,3 @@ def summarize_conversation(history: List[dict]) -> str:
 def get_conversation_summary() -> str:
     history = load_conversation_history()
     return summarize_conversation(history)
-
