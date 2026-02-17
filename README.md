@@ -101,6 +101,12 @@ See [AGENTS.md](AGENTS.md) for coding style, testing guidance, and operational n
 
 # Life-Style-Agent
 
+## UIプレビュー
+
+<p align="center">
+  <img src="assets/images/Life-Syle-Agent-Screenshot.png" width="1000" alt="Life-Style-Agent web UI screenshot">
+</p>
+
 Life-Style-Agentは、家庭生活における多様なトピックに関する質問に答えるための、RAG（Retrieval-Augmented Generation）エンジンを備えた知的エージェントです。
 
 ## 特徴
