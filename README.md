@@ -2,6 +2,12 @@
 
 <img src="static/Life-Style-Agent-Logo.png" width="800" alt="Life-Style-Agent logo">
 
+## UI Preview
+
+<p align="center">
+  <img src="assets/images/Life-Syle-Agent-Screenshot.png" width="1000" alt="Life-Style-Agent web UI screenshot">
+</p>
+
 Life-Style-Agent is an intelligent assistant with a RAG (Retrieval-Augmented Generation) engine for answering everyday life questions across domains like career, finance, cooking, home appliances, lifestyle, mental health, and society.
 
 ## Features
