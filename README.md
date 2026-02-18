@@ -8,6 +8,14 @@
   <img src="assets/images/Life-Syle-Agent-Screenshot.png" width="1000" alt="Life-Style-Agent web UI screenshot">
 </p>
 
+## 🎬 Demo Videos
+
+Click a thumbnail to open the video on YouTube.
+
+| [![Demo Video 1](https://img.youtube.com/vi/Ekhm9XJBhUg/hqdefault.jpg)](https://youtu.be/Ekhm9XJBhUg) | [![Demo Video 2](https://img.youtube.com/vi/Qoidfk93CHk/hqdefault.jpg)](https://youtu.be/Qoidfk93CHk) |
+| --- | --- |
+| Demo Video 1 | Demo Video 2 |
+
 Life-Style-Agent is an intelligent assistant with a RAG (Retrieval-Augmented Generation) engine for answering everyday life questions across domains like career, finance, cooking, home appliances, lifestyle, mental health, and society.
 
 ## Features
@@ -106,6 +114,14 @@ See [AGENTS.md](AGENTS.md) for coding style, testing guidance, and operational n
 <p align="center">
   <img src="assets/images/Life-Syle-Agent-Screenshot.png" width="1000" alt="Life-Style-Agent web UI screenshot">
 </p>
+
+## 🎬 デモ動画
+
+サムネイルをクリックすると、YouTubeで動画を開けます。
+
+| [![デモ動画1](https://img.youtube.com/vi/Ekhm9XJBhUg/hqdefault.jpg)](https://youtu.be/Ekhm9XJBhUg) | [![デモ動画2](https://img.youtube.com/vi/Qoidfk93CHk/hqdefault.jpg)](https://youtu.be/Qoidfk93CHk) |
+| --- | --- |
+| デモ動画1 | デモ動画2 |
 
 Life-Style-Agentは、家庭生活における多様なトピックに関する質問に答えるための、RAG（Retrieval-Augmented Generation）エンジンを備えた知的エージェントです。
 
