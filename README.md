@@ -1,6 +1,20 @@
+> 一番下に日本語版もあります。
+
 # Life-Style-Agent
 
 <img src="static/Life-Style-Agent-Logo.png" width="800" alt="Life-Style-Agent logo">
+
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-0.3-1C3C3C?logo=langchain&logoColor=white)
+![FAISS](https://img.shields.io/badge/FAISS-VectorDB-00629B?logo=meta&logoColor=white)
+![HuggingFace](https://img.shields.io/badge/HuggingFace-Embeddings-FFD21E?logo=huggingface&logoColor=black)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-Server-6B21A8?logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-API-412991?logo=openai&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-API-8E75B2?logo=google&logoColor=white)
+![Anthropic](https://img.shields.io/badge/Anthropic-API-D97757?logo=anthropic&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-API-F55036?logo=groq&logoColor=white)
 
 ## UI Preview
 
@@ -108,6 +122,18 @@ See [AGENTS.md](AGENTS.md) for coding style, testing guidance, and operational n
 <summary>日本語</summary>
 
 # Life-Style-Agent
+
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-0.3-1C3C3C?logo=langchain&logoColor=white)
+![FAISS](https://img.shields.io/badge/FAISS-VectorDB-00629B?logo=meta&logoColor=white)
+![HuggingFace](https://img.shields.io/badge/HuggingFace-Embeddings-FFD21E?logo=huggingface&logoColor=black)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-Server-6B21A8?logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-API-412991?logo=openai&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-API-8E75B2?logo=google&logoColor=white)
+![Anthropic](https://img.shields.io/badge/Anthropic-API-D97757?logo=anthropic&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-API-F55036?logo=groq&logoColor=white)
 
 ## UIプレビュー
 
