@@ -28,7 +28,7 @@ Click a thumbnail to open the video on YouTube.
 
 | [![Demo Video 1](https://img.youtube.com/vi/Ekhm9XJBhUg/hqdefault.jpg)](https://youtu.be/Ekhm9XJBhUg) | [![Demo Video 2](https://img.youtube.com/vi/Qoidfk93CHk/hqdefault.jpg)](https://youtu.be/Qoidfk93CHk) |
 | --- | --- |
-| Demo Video 1 | Demo Video 2 |
+| Looking up tonight's dinner menu | What to watch out for in NISA (stock) investing |
 
 Life-Style-Agent is an intelligent assistant with a RAG (Retrieval-Augmented Generation) engine for answering everyday life questions across domains like career, finance, cooking, home appliances, lifestyle, mental health, and society.
 
@@ -147,7 +147,7 @@ See [AGENTS.md](AGENTS.md) for coding style, testing guidance, and operational n
 
 | [![デモ動画1](https://img.youtube.com/vi/Ekhm9XJBhUg/hqdefault.jpg)](https://youtu.be/Ekhm9XJBhUg) | [![デモ動画2](https://img.youtube.com/vi/Qoidfk93CHk/hqdefault.jpg)](https://youtu.be/Qoidfk93CHk) |
 | --- | --- |
-| デモ動画1 | デモ動画2 |
+| 今日の晩御飯の献立を調べる | NISA(株式）投資で気を付けることを調べる |
 
 Life-Style-Agentは、家庭生活における多様なトピックに関する質問に答えるための、RAG（Retrieval-Augmented Generation）エンジンを備えた知的エージェントです。
 
