@@ -112,6 +112,25 @@ docker compose down
 
 The MCP server is available via `mcp_server.py` and exposes the `rag_answer` tool for MCP-compatible clients.
 
+## Evaluation
+
+### Life-Style Agent
+
+**Role**
+The Life-Style Agent is a RAG-based knowledge agent specialized for everyday support, such as cooking, finance, mental wellness, and home knowledge.
+
+**Evaluation Protocol**
+I prepared domain-specific QA tasks and evaluated whether the generated answers included the required core concepts from retrieved knowledge.
+
+**Result**
+The evaluation showed that the agent could consistently ground its answers in domain-relevant information across multiple lifestyle domains.
+
+**Interpretation**
+For this agent, the key research point is not only "which LLM is stronger," but also **how retrieval quality and grounding design affect downstream answer reliability**.
+
+**Why this matters**
+This section demonstrates that I did not treat RAG as a black box; I evaluated it as a retrieval-conditioned reasoning system.
+
 ## Development Guidelines
 
 See [AGENTS.md](AGENTS.md) for coding style, testing guidance, and operational notes.
@@ -230,6 +249,25 @@ docker compose down
 ## MCPサーバー利用
 
 `mcp_server.py` を通じて、MCP対応クライアントから `rag_answer` ツールを利用できます。
+
+## 評価
+
+### ライフスタイルエージェント
+
+**役割**
+ライフスタイルエージェントは、料理・家計・メンタルヘルス・家事知識など、日常生活のサポートに特化したRAGベースの知識エージェントです。
+
+**評価プロトコル**
+ドメインごとのQAタスクを用意し、生成された回答が検索された知識から必要なコア概念を含んでいるかどうかを評価しました。
+
+**結果**
+評価の結果、エージェントは複数のライフスタイルドメインにわたって、ドメイン関連情報に一貫して根拠を置いた回答を生成できることが示されました。
+
+**解釈**
+このエージェントにとって重要な研究観点は「どのLLMが優れているか」だけでなく、**検索品質とグラウンディング設計が回答信頼性にどのような影響を与えるか**です。
+
+**この評価の意義**
+このセクションは、RAGをブラックボックスとして扱わず、検索条件付き推論システムとして評価したことを示しています。
 
 ## 開発ガイドライン
 
