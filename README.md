@@ -116,20 +116,51 @@ The MCP server is available via `mcp_server.py` and exposes the `rag_answer` too
 
 ### Life-Style Agent
 
-**Role**
-The Life-Style Agent is a RAG-based knowledge agent specialized for everyday support, such as cooking, finance, mental wellness, and home knowledge.
+**Overview**
 
-**Evaluation Protocol**
-I prepared domain-specific QA tasks and evaluated whether the generated answers included the required core concepts from retrieved knowledge.
+10 QA tasks across 4 domains were evaluated against 9 LLMs. Scoring is based on whether the model's answer contains the core keywords from the expected answer.
 
-**Result**
-The evaluation showed that the agent could consistently ground its answers in domain-relevant information across multiple lifestyle domains.
+| Score | Criteria |
+|---|---|
+| ○ | All core keywords present |
+| △ | At least one core keyword present |
+| × | No core keywords present |
 
-**Interpretation**
-For this agent, the key research point is not only "which LLM is stronger," but also **how retrieval quality and grounding design affect downstream answer reliability**.
+**Tasks**
 
-**Why this matters**
-This section demonstrates that I did not treat RAG as a black box; I evaluated it as a retrieval-conditioned reasoning system.
+| # | Domain | Question (Summary) | Expected Answer |
+|---|---|---|---|
+| 1 | Home | What to do immediately after ironing to prevent re-wrinkling? | Hang and let cool |
+| 2 | Cooking | How to check avocado ripeness beyond skin color? | Gently press (slight give) or check stem detachment |
+| 3 | Finance | Annual investment limit for the "tsumitate" frame in new NISA? | ¥1,200,000/year (¥100,000/month) |
+| 4 | Mental | How many seconds does the peak of anger last? | 6 seconds |
+| 5 | Cooking | How to prep chicken breast to keep it moist? | Slice thin; marinate with shio-koji or mayo for 10 min; or coat with starch and cook on low heat |
+| 6 | Mental | How does the 4-7-8 breathing technique work? | Inhale 4 sec → hold 7 sec → exhale 8 sec |
+| 7 | Cooking | Too tired to use a knife — easy dish with pork belly and napa cabbage? | Layered pork & cabbage steam: stack in pot, add sake & chicken stock, leave to steam |
+| 8 | Cooking | Meal-prep ideas that work in lunch boxes and can be frozen? | Chicken nanban, hijiki & soybean simmered dish, infinite pepper & miso pork stir-fry, etc. |
+| 9 | Finance | iDeCo vs NISA — what's the unique benefit of iDeCo and its key restriction? | Benefit: full income deduction. Restriction: cannot withdraw until age 60 |
+| 10 | Mental | Big presentation tomorrow, too anxious to sleep — what to do? | Try military sleep method (progressive muscle relaxation); if still awake, accept that lying still rests the body ~80% |
+
+**Results**
+
+| Task | GPT-4.1 | Gemini 2.5 Pro | Claude Opus 4.5 | Claude Haiku 4.5 | Llama 3.3 70B | Qwen 3 32B | Gemini 2.5 Flash-Lite | Llama 3.1 8B | GPT-o4-mini |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 2 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 3 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 4 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 5 | ○ | ○ | ○ | ○ | ○ | **△** | ○ | ○ | ○ |
+| 6 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 7 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 8 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 9 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 10 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+
+**Analysis**
+
+All models scored ○ except Qwen 3 32B on task 5 (△). The single gap is likely a keyword-matching artifact rather than a true capability gap — Qwen's answer was semantically correct but phrased differently.
+
+More importantly, **all models received the same retrieved context** because the same embedding model (`intfloat/multilingual-e5-large`) was used throughout. This means **retrieval quality dominated the results**, not LLM generation ability. Future evaluations will introduce synonym-aware and semantic-similarity metrics to reduce surface-form bias.
 
 ## Development Guidelines
 
@@ -254,20 +285,51 @@ docker compose down
 
 ### ライフスタイルエージェント
 
-**役割**
-ライフスタイルエージェントは、料理・家計・メンタルヘルス・家事知識など、日常生活のサポートに特化したRAGベースの知識エージェントです。
+**概要**
 
-**評価プロトコル**
-ドメインごとのQAタスクを用意し、生成された回答が検索された知識から必要なコア概念を含んでいるかどうかを評価しました。
+4つのドメインにわたる10のQAタスクを、9つのLLMで評価しました。採点基準は、モデルの回答に正解の核となるキーワードが含まれているかどうかです。
 
-**結果**
-評価の結果、エージェントは複数のライフスタイルドメインにわたって、ドメイン関連情報に一貫して根拠を置いた回答を生成できることが示されました。
+| 評価 | 基準 |
+|---|---|
+| ○ | 核となる単語をすべて含む |
+| △ | 1つ以上核となる単語を含む |
+| × | 1つも含まない |
 
-**解釈**
-このエージェントにとって重要な研究観点は「どのLLMが優れているか」だけでなく、**検索品質とグラウンディング設計が回答信頼性にどのような影響を与えるか**です。
+**評価タスク一覧**
 
-**この評価の意義**
-このセクションは、RAGをブラックボックスとして扱わず、検索条件付き推論システムとして評価したことを示しています。
+| # | ドメイン | 質問（要約） | 正解 |
+|---|---|---|---|
+| 1 | 家電 | アイロン後、戻りジワを防ぐためにすぐすべきことは？ | ハンガーで冷ます |
+| 2 | 料理 | アボカドの食べ頃を皮の色以外で見分けるには？ | 指で押して弾力を確認、またはヘタが取れそうか確認 |
+| 3 | 金融 | 新NISAの「つみたて投資枠」の年間上限額は？ | 年間120万円（月10万円） |
+| 4 | メンタル | 怒りの感情のピークは何秒続く？ | 6秒 |
+| 5 | 料理 | 鶏胸肉をパサつかせずしっとり仕上げる下処理は？ | 削ぎ切り・塩麹かマヨで10分漬け・片栗粉をまぶして弱火 |
+| 6 | メンタル | 「4-7-8呼吸法」の具体的なやり方は？ | 4秒吸って→7秒止めて→8秒吐く |
+| 7 | 料理 | 疲れて包丁を使いたくない。豚バラと白菜で作れる簡単な料理は？ | 豚バラと白菜の重ね蒸し（酒と鶏ガラスープを入れて放置） |
+| 8 | 料理 | 弁当に入れられて冷凍保存もできる作り置きおかずは？ | 鶏むね南蛮漬け、ひじきと大豆の煮物、無限ピーマンの肉味噌炒めなど |
+| 9 | 金融 | iDeCo特有のメリットと「引き出し制限」は？ | メリット：掛金が全額所得控除。制限：原則60歳まで引き出せない |
+| 10 | メンタル | 明日プレゼンがあって緊張で眠れない。どうすればいい？ | 米軍式睡眠法（筋弛緩）を試す。それでも無理なら「横になるだけで8割休める」と割り切る |
+
+**評価結果**
+
+| タスク | GPT-4.1 | Gemini 2.5 Pro | Claude Opus 4.5 | Claude Haiku 4.5 | Llama 3.3 70B | Qwen 3 32B | Gemini 2.5 Flash-Lite | Llama 3.1 8B | GPT-o4-mini |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 2 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 3 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 4 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 5 | ○ | ○ | ○ | ○ | ○ | **△** | ○ | ○ | ○ |
+| 6 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 7 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 8 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 9 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| 10 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+
+**考察**
+
+Qwen 3 32Bのタスク5における△を除き、全モデルが○を記録しました。この差分はモデル能力の差というより、**表層一致ベースの採点（言い換え耐性の欠如）** が影響した可能性があります。
+
+より重要な点として、全評価タスクで同一の埋め込みモデル（`intfloat/multilingual-e5-large`）を使用したため、**すべてのLLMに渡される検索コンテキストは同一**でした。その結果、**モデル間の回答精度に大きな差は生じず、結果を支配したのはLLMの生成能力ではなく検索フェーズ（埋め込みモデル）の質**であることが示されました。今後は同義語許容・意味類似度に基づく補助評価を導入する予定です。
 
 ## 開発ガイドライン
 
